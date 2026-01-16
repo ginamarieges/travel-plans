@@ -1,9 +1,14 @@
 package com.ginamarieges.travelplans.service;
 
+import com.ginamarieges.travelplans.domain.City;
 import com.ginamarieges.travelplans.domain.Plan;
+import com.ginamarieges.travelplans.domain.PlanType;
 import com.ginamarieges.travelplans.repository.PlanRepository;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class PlanService {
@@ -27,7 +32,7 @@ public class PlanService {
     if (!validationResult.isValid()) {
       return validationResult;
     }
-    // When create a plan the plan id should be null
+    // On create, we always let the repository assign the ID.
     plan.setId(null);
 
     planRepository.save(plan);
@@ -65,5 +70,84 @@ public class PlanService {
 
   public List<Plan> getAllPlans() {
     return planRepository.findAll();
+  }
+
+  public CompatibilityGroupingResult groupPlansByCompatibility() {
+    List<Plan> allPlans = planRepository.findAll();
+
+    Map<CompatibilityKey, List<Plan>> plansByKey = new LinkedHashMap<>();
+
+    for (Plan plan : allPlans) {
+      //Create Compatibility keys for each plan
+      CompatibilityKey key = CompatibilityKey.fromPlan(plan);
+      //Add list of plans for each key
+      plansByKey.computeIfAbsent(key, ignoredKey -> new ArrayList<>()).add(plan);
+    }
+
+    List<Plan> compatiblePlans = new ArrayList<>();
+    List<Plan> otherPlans = new ArrayList<>();
+
+    for (List<Plan> group : plansByKey.values()) {
+      if (group.size() >= 2) {
+        compatiblePlans.addAll(group);
+      } else {
+        otherPlans.addAll(group);
+      }
+    }
+
+    return new CompatibilityGroupingResult(compatiblePlans, otherPlans);
+  } 
+
+  private static final class CompatibilityKey {
+
+    private final PlanType planType;
+    private final String originCity;
+    private final String destinationCity;
+
+    private CompatibilityKey(PlanType planType, String originCityNameNormalized, String destinationCityNameNormalized) {
+      this.planType = planType;
+      this.originCity = originCityNameNormalized;
+      this.destinationCity = destinationCityNameNormalized;
+    }
+
+    static CompatibilityKey fromPlan(Plan plan) {
+      City originCity = plan == null ? null : plan.getOrigin();
+      City destinationCity = plan == null ? null : plan.getDestination();
+
+      String originName = originCity == null ? null : originCity.getName();
+      String destinationName = destinationCity == null ? null : destinationCity.getName();
+
+      return new CompatibilityKey(
+        plan == null ? null : plan.getType(),
+        normalizeText(originName),
+        normalizeText(destinationName)
+      );
+    }
+
+    private static String normalizeText(String rawText) {
+      return rawText == null ? "" : rawText.trim().toUpperCase();
+    }
+
+    @Override
+    public boolean equals(Object otherObject) {
+      if (this == otherObject) {
+        return true;
+      }
+      if (!(otherObject instanceof CompatibilityKey)) {
+        return false;
+      }
+      CompatibilityKey otherKey = (CompatibilityKey) otherObject;
+      return planType == otherKey.planType
+        && originCity.equals(otherKey.originCity)
+        && destinationCity.equals(otherKey.destinationCity);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = planType == null ? 0 : planType.hashCode();
+      result = 31 * result + originCity.hashCode();
+      result = 31 * result + destinationCity.hashCode();
+      return result;
+    }
   }
 }
