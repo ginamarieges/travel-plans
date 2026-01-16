@@ -1,0 +1,15 @@
+# Maven
+/target/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Tomcat exploded deployments (si aparecen)
+/travel-plans/
