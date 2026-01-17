@@ -27,6 +27,7 @@
     <% } else { %>
       <a class="btn btn-default" href="<%= request.getContextPath() %>/plans">Undo grouping</a>
     <% } %>
+    <a class="btn btn-success" href="<%= request.getContextPath() %>/plans/new">Create plan</a>
   </div>
 
   <% if (!isGroupingEnabled) { %>
