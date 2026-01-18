@@ -7,18 +7,18 @@ import com.ginamarieges.travelplans.domain.Plan;
 
 public class CompatibilityGroupingResult {
   private final List<Plan> compatiblePlans;
-  private final List<Plan> nonCompatiblePlans;
+  private final List<Plan> otherPlans;
 
-  public CompatibilityGroupingResult(List<Plan> compatiblePlans, List<Plan> nonCompatiblePlans) {
+  public CompatibilityGroupingResult(List<Plan> compatiblePlans, List<Plan> otherPlans) {
     this.compatiblePlans = compatiblePlans == null ? Collections.emptyList() : Collections.unmodifiableList(compatiblePlans);
-    this.nonCompatiblePlans = nonCompatiblePlans == null ? Collections.emptyList() : Collections.unmodifiableList(nonCompatiblePlans);
+    this.otherPlans = otherPlans == null ? Collections.emptyList() : Collections.unmodifiableList(otherPlans);
   }
 
   public List<Plan> getCompatiblePlans() {
     return compatiblePlans;
   }
 
-  public List<Plan> getNonCompatiblePlans() {
-    return nonCompatiblePlans;
+  public List<Plan> getOtherPlans() {
+    return otherPlans;
   }
 }

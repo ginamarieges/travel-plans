@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
 WAR_NAME="travel-plans"
-TOMCAT_WEBAPPS="/opt/homebrew/opt/tomcat@9/libexec/webapps"
+TOMCAT_WEBAPPS="/opt/homebrew/Cellar/tomcat@9/9.0.113/libexec/webapps"
 
 echo "1) Compilando y empaquetando WAR..."
 cd "$PROJECT_ROOT"
