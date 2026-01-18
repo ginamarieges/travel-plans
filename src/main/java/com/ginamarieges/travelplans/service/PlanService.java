@@ -3,6 +3,7 @@ package com.ginamarieges.travelplans.service;
 import com.ginamarieges.travelplans.domain.City;
 import com.ginamarieges.travelplans.domain.Plan;
 import com.ginamarieges.travelplans.domain.PlanType;
+import com.ginamarieges.travelplans.repository.CityRepository;
 import com.ginamarieges.travelplans.repository.PlanRepository;
 
 import java.util.ArrayList;
@@ -15,23 +16,33 @@ public class PlanService {
 
   private final PlanRepository planRepository;
   private final PlanValidator planValidator;
+  private final CityRepository cityRepository;
 
-  public PlanService(PlanRepository planRepository, PlanValidator planValidator) {
+  public PlanService(PlanRepository planRepository, PlanValidator planValidator, CityRepository cityRepository) {
     if (planRepository == null) {
       throw new IllegalArgumentException("PlanRepository must not be null");
     }
     if (planValidator == null) {
       throw new IllegalArgumentException("PlanValidator must not be null");
     }
+    if (cityRepository == null) {
+      throw new IllegalArgumentException("CityRepository must not be null");
+    }
     this.planRepository = planRepository;
     this.planValidator = planValidator;
+    this.cityRepository = cityRepository;
   }
 
-  public ValidationResult createPlan(Plan plan) {
+  public ValidationResult createPlan(Plan plan, String originCityName, String destinationCityName) {
+    
     ValidationResult validationResult = planValidator.validate(plan);
     if (!validationResult.isValid()) {
       return validationResult;
     }
+
+    plan.setOrigin(resolveCity(originCityName));
+    plan.setDestination(resolveCity(destinationCityName));
+
     // On create, we always let the repository assign the ID.
     plan.setId(null);
 
@@ -150,4 +161,15 @@ public class PlanService {
       return result;
     }
   }
+  private City resolveCity(String cityNameRaw) {
+    if (cityNameRaw == null || cityNameRaw.trim().isEmpty()) {
+      return null;
+    }
+
+    String cityName = cityNameRaw.trim();
+
+    return cityRepository.findByName(cityName)
+        .orElseGet(() -> cityRepository.save(new City(null, cityName)));
+  }
+
 }
