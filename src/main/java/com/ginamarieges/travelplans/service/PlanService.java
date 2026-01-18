@@ -35,13 +35,13 @@ public class PlanService {
 
   public ValidationResult createPlan(Plan plan, String originCityName, String destinationCityName) {
     
+    plan.setOrigin(resolveCity(originCityName));
+    plan.setDestination(resolveCity(destinationCityName));
+
     ValidationResult validationResult = planValidator.validate(plan);
     if (!validationResult.isValid()) {
       return validationResult;
     }
-
-    plan.setOrigin(resolveCity(originCityName));
-    plan.setDestination(resolveCity(destinationCityName));
 
     // On create, we always let the repository assign the ID.
     plan.setId(null);

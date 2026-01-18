@@ -76,7 +76,7 @@
 
     <%
       List<Plan> compatiblePlans = (List<Plan>) request.getAttribute("compatiblePlans");
-      List<Plan> otherPlans = (List<Plan>) request.getAttribute("nonCompatiblePlans");
+      List<Plan> otherPlans = (List<Plan>) request.getAttribute("otherPlans");
 
       if (compatiblePlans == null) {
         compatiblePlans = java.util.Collections.emptyList();
