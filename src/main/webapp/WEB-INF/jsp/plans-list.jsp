@@ -68,6 +68,10 @@
             <td><%= plan.getOrigin() == null ? "" : plan.getOrigin().getName() %></td>
             <td><%= plan.getDestination() == null ? "" : plan.getDestination().getName() %></td>
             <td>
+              <a href="<%= request.getContextPath() %>/plans/new?id=<%= plan.getId() %>" 
+                 class="btn btn-primary btn-xs">
+                Edit
+              </a>
               <form method="post" action="<%= request.getContextPath() %>/plans" style="display: inline;" class="delete-form">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<%= plan.getId() %>">
@@ -76,7 +80,6 @@
                   Delete
                 </button>
               </form>
-              <!-- Aquí irá el botón de modificar más adelante -->
             </td>
           </tr>
         <% } %>
@@ -128,6 +131,10 @@
             <td><%= plan.getOrigin() == null ? "" : plan.getOrigin().getName() %></td>
             <td><%= plan.getDestination() == null ? "" : plan.getDestination().getName() %></td>
             <td>
+              <a href="<%= request.getContextPath() %>/plans/new?id=<%= plan.getId() %>" 
+                 class="btn btn-primary btn-xs">
+                Edit
+              </a>
               <form method="post" action="<%= request.getContextPath() %>/plans" style="display: inline;" class="delete-form">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<%= plan.getId() %>">
@@ -173,6 +180,10 @@
             <td><%= plan.getOrigin() == null ? "" : plan.getOrigin().getName() %></td>
             <td><%= plan.getDestination() == null ? "" : plan.getDestination().getName() %></td>
             <td>
+              <a href="<%= request.getContextPath() %>/plans/new?id=<%= plan.getId() %>" 
+                 class="btn btn-primary btn-xs">
+                Edit
+              </a>
               <form method="post" action="<%= request.getContextPath() %>/plans" style="display: inline;" class="delete-form">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<%= plan.getId() %>">
@@ -189,7 +200,6 @@
     </table>
 
   <% } %>
-  
 <!-- Modal -->
   <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
