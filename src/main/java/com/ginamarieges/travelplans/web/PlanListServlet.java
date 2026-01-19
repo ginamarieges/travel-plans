@@ -40,7 +40,37 @@ public class PlanListServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        // Detect what action is requested
+        String action = request.getParameter("action");
+        
+        if ("delete".equals(action)) {
+            handleDelete(request, response);
+            return;
+        }
+        
+        handleCreate(request, response);
+    }
+
+    private void handleDelete(HttpServletRequest request, HttpServletResponse response) 
+            throws IOException {
+        String planId = request.getParameter("id");
+        
+        if (planId != null && !planId.isEmpty()) {
+            try {
+                Integer id = Integer.parseInt(planId);
+                planService.deletePlan(id);
+            } catch (NumberFormatException e) {
+                // Log error si es necesario
+            }
+        }
+        
+        response.sendRedirect(request.getContextPath() + "/plans");
+    }
+
+    private void handleCreate(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
         String name = request.getParameter("name");
         String typeRaw = request.getParameter("type");
         String totalAdultsRaw = request.getParameter("totalAdults");
@@ -57,18 +87,17 @@ public class PlanListServlet extends HttpServlet {
         ValidationResult validationResult = planService.createPlan(plan, originName, destinationName);
 
         if (!validationResult.isValid()) {
-        request.setAttribute("errorsByFieldName", validationResult.getErrorsByFieldName());
+            request.setAttribute("errorsByFieldName", validationResult.getErrorsByFieldName());
 
-        // Refill values so the user doesn't lose inputs
-        request.setAttribute("nameValue", safeString(name));
-        request.setAttribute("typeValue", safeString(typeRaw));
-        request.setAttribute("totalAdultsValue", safeString(totalAdultsRaw));
-        request.setAttribute("totalKidsValue", safeString(totalKidsRaw));
-        request.setAttribute("originValue", safeString(originName));
-        request.setAttribute("destinationValue", safeString(destinationName));
+            request.setAttribute("nameValue", safeString(name));
+            request.setAttribute("typeValue", safeString(typeRaw));
+            request.setAttribute("totalAdultsValue", safeString(totalAdultsRaw));
+            request.setAttribute("totalKidsValue", safeString(totalKidsRaw));
+            request.setAttribute("originValue", safeString(originName));
+            request.setAttribute("destinationValue", safeString(destinationName));
 
-        request.getRequestDispatcher("/WEB-INF/jsp/plan-form.jsp").forward(request, response);
-        return;
+            request.getRequestDispatcher("/WEB-INF/jsp/plan-form.jsp").forward(request, response);
+            return;
         }
 
         response.sendRedirect(request.getContextPath() + "/plans");
