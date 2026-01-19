@@ -50,7 +50,14 @@ public class PlanService {
     return validationResult;
   }
 
-  public ValidationResult updatePlan(Plan plan) {
+  public ValidationResult updatePlan(Plan plan, String originCityName, String destinationCityName) {
+    if (plan == null) {
+      throw new IllegalArgumentException("Plan must not be null");
+    }
+
+    plan.setOrigin(resolveCity(originCityName));
+    plan.setDestination(resolveCity(destinationCityName));
+
     ValidationResult validationResult = planValidator.validate(plan);
     if (!validationResult.isValid()) {
       return validationResult;
