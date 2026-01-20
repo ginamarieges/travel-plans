@@ -4,7 +4,7 @@
 <%
     Plan plan = (Plan) request.getAttribute("plan");
     boolean isEdit = Boolean.TRUE.equals(request.getAttribute("isEdit"));
-    String title = isEdit ? "Edit plan" : "Create plan";
+    String title = isEdit ? "Editar plan" : "Crear plan";
 %>
 <!doctype html>
 <html>
@@ -26,54 +26,54 @@
   <% } %>
 
   <div class="form-group">
-    <label>Name</label>
+    <label>Nombre</label>
     <input class="form-control" name="name"
            value="<%= plan == null ? "" : plan.getName() %>"/>
   </div>
 
   <div class="form-group">
-    <label>Type</label>
+    <label>Tipo</label>
     <select class="form-control" name="type" id="planType">
-      <option value="">-- select --</option>
+      <option value="">Seleccionar tipo de plan</option>
       <option value="NORMAL"
         <%= plan != null && plan.getType() == PlanType.NORMAL ? "selected" : "" %>>
         Normal
       </option>
       <option value="TRABAJO"
         <%= plan != null && plan.getType() == PlanType.TRABAJO ? "selected" : "" %>>
-        Work
+        Trabajo
       </option>
     </select>
   </div>
 
   <div class="form-group">
-    <label>Total adults</label>
+    <label>Total adultos</label>
     <input class="form-control" name="totalAdults" type="number"
            value="<%= plan == null || plan.getTotalAdults() == null ? "" : plan.getTotalAdults() %>"/>
   </div>
 
   <div class="form-group">
-    <label>Total kids</label>
+    <label>Total niños</label>
     <input class="form-control" name="totalKids" type="number" id="totalKids"
            value="<%= plan == null || plan.getTotalKids() == null ? "" : plan.getTotalKids() %>"/>
   </div>
 
   <div class="form-group">
-    <label>Origin</label>
+    <label>Origen</label>
     <input class="form-control" name="origin"
            value="<%= plan == null || plan.getOrigin() == null ? "" : plan.getOrigin().getName() %>"/>
   </div>
 
   <div class="form-group">
-    <label>Destination</label>
+    <label>Destino</label>
     <input class="form-control" name="destination"
            value="<%= plan == null || plan.getDestination() == null ? "" : plan.getDestination().getName() %>"/>
   </div>
 
   <button class="btn btn-success" type="submit">
-    <%= isEdit ? "Update" : "Create" %>
+    <%= isEdit ? "Guardar" : "Crear" %>
   </button>
-  <a class="btn btn-default" href="<%= request.getContextPath() %>/plans">Back</a>
+  <a class="btn btn-default" href="<%= request.getContextPath() %>/plans">Atrás</a>
 </form>
 
 <script>

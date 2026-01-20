@@ -11,7 +11,7 @@
 <body class="container" style="margin-top: 20px;">
 
   <div class="page-header">
-    <h1>Travel Plans</h1>
+    <h1>Gestor de planes</h1>
   </div>
 
   <%
@@ -23,11 +23,11 @@
 
   <div style="margin-bottom: 15px;">
     <% if (!isGroupingEnabled) { %>
-      <a class="btn btn-primary" href="<%= request.getContextPath() %>/plans?grouping=true">Group compatible plans</a>
+      <a class="btn btn-primary" href="<%= request.getContextPath() %>/plans?grouping=true">Planes compatibles</a>
     <% } else { %>
-      <a class="btn btn-default" href="<%= request.getContextPath() %>/plans">Undo grouping</a>
+      <a class="btn btn-default" href="<%= request.getContextPath() %>/plans">Todos los planes</a>
     <% } %>
-    <a class="btn btn-success" href="<%= request.getContextPath() %>/plans/new">Create plan</a>
+    <a class="btn btn-success" href="<%= request.getContextPath() %>/plans/new">Crear plan</a>
   </div>
 
   <% if (!isGroupingEnabled) { %>
@@ -38,46 +38,44 @@
       }
     %>
 
-    <h3>All plans</h3>
+    <h3>Planes</h3>
     <table class="table table-striped table-bordered">
       <thead>
       <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Adults</th>
-        <th>Kids</th>
-        <th>Origin</th>
-        <th>Destination</th>
-        <th>Actions</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Adultos</th>
+        <th>Niños</th>
+        <th>Origen</th>
+        <th>Destino</th>
+        <th>Acciones</th>
       </tr>
       </thead>
       <tbody>
       <% if (plans.isEmpty()) { %>
         <tr>
-          <td colspan="8" class="text-muted">No plans yet.</td>
+          <td colspan="8" class="text-muted">Aún no hay planes</td>
         </tr>
       <% } else { %>
         <% for (Plan plan : plans) { %>
           <tr>
-            <td><%= plan.getId() %></td>
             <td><%= plan.getName() %></td>
             <td><%= plan.getType() %></td>
             <td><%= plan.getTotalAdults() %></td>
-            <td><%= plan.getTotalKids() %></td>
+            <td><%= plan.getTotalKids() == null ? "0" : plan.getTotalKids() %></td>
             <td><%= plan.getOrigin() == null ? "" : plan.getOrigin().getName() %></td>
             <td><%= plan.getDestination() == null ? "" : plan.getDestination().getName() %></td>
             <td>
               <a href="<%= request.getContextPath() %>/plans/new?id=<%= plan.getId() %>" 
                  class="btn btn-primary btn-xs">
-                Edit
+                Editar
               </a>
               <form method="post" action="<%= request.getContextPath() %>/plans" style="display: inline;" class="delete-form">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<%= plan.getId() %>">
                 <input type="hidden" name="planName" value="<%= plan.getName() %>">
                 <button type="submit" class="btn btn-danger btn-xs">
-                  Delete
+                  Borrar
                 </button>
               </form>
             </td>
@@ -101,46 +99,44 @@
       }
     %>
 
-    <h3>Compatible plans</h3>
+    <h3>Planes compatibles</h3>
     <table class="table table-striped table-bordered">
       <thead>
       <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Adults</th>
-        <th>Kids</th>
-        <th>Origin</th>
-        <th>Destination</th>
-        <th>Actions</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Adultos</th>
+        <th>Niños</th>
+        <th>Origen</th>
+        <th>Destino</th>
+        <th>Acciones</th>
       </tr>
       </thead>
       <tbody>
       <% if (compatiblePlans.isEmpty()) { %>
         <tr>
-          <td colspan="8" class="text-muted">No compatible plans found.</td>
+          <td colspan="8" class="text-muted">No se han encontrado planes compatibles</td>
         </tr>
       <% } else { %>
         <% for (Plan plan : compatiblePlans) { %>
           <tr>
-            <td><%= plan.getId() %></td>
             <td><%= plan.getName() %></td>
             <td><%= plan.getType() %></td>
             <td><%= plan.getTotalAdults() %></td>
-            <td><%= plan.getTotalKids() %></td>
+            <td><%= plan.getTotalKids() == null ? "0" : plan.getTotalKids() %></td>
             <td><%= plan.getOrigin() == null ? "" : plan.getOrigin().getName() %></td>
             <td><%= plan.getDestination() == null ? "" : plan.getDestination().getName() %></td>
             <td>
               <a href="<%= request.getContextPath() %>/plans/new?id=<%= plan.getId() %>" 
                  class="btn btn-primary btn-xs">
-                Edit
+                Editar
               </a>
               <form method="post" action="<%= request.getContextPath() %>/plans" style="display: inline;" class="delete-form">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<%= plan.getId() %>">
                 <input type="hidden" name="planName" value="<%= plan.getName() %>">
                 <button type="submit" class="btn btn-danger btn-xs">
-                  Delete
+                  Borrar
                 </button>
               </form>
             </td>
@@ -150,46 +146,44 @@
       </tbody>
     </table>
 
-    <h3>Other plans</h3>
+    <h3>Otros planes</h3>
     <table class="table table-striped table-bordered">
       <thead>
       <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Adults</th>
-        <th>Kids</th>
-        <th>Origin</th>
-        <th>Destination</th>
-        <th>Actions</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Adultos</th>
+        <th>Niños</th>
+        <th>Origen</th>
+        <th>Destino</th>
+        <th>Acciones</th>
       </tr>
       </thead>
       <tbody>
       <% if (otherPlans.isEmpty()) { %>
         <tr>
-          <td colspan="8" class="text-muted">No other plans.</td>
+          <td colspan="8" class="text-muted">No hay otros planes</td>
         </tr>
       <% } else { %>
         <% for (Plan plan : otherPlans) { %>
           <tr>
-            <td><%= plan.getId() %></td>
             <td><%= plan.getName() %></td>
             <td><%= plan.getType() %></td>
             <td><%= plan.getTotalAdults() %></td>
-            <td><%= plan.getTotalKids() %></td>
+            <td><%= plan.getTotalKids() == null ? "0" : plan.getTotalKids() %></td>
             <td><%= plan.getOrigin() == null ? "" : plan.getOrigin().getName() %></td>
             <td><%= plan.getDestination() == null ? "" : plan.getDestination().getName() %></td>
             <td>
               <a href="<%= request.getContextPath() %>/plans/new?id=<%= plan.getId() %>" 
                  class="btn btn-primary btn-xs">
-                Edit
+                Editar
               </a>
               <form method="post" action="<%= request.getContextPath() %>/plans" style="display: inline;" class="delete-form">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<%= plan.getId() %>">
                 <input type="hidden" name="planName" value="<%= plan.getName() %>">
                 <button type="submit" class="btn btn-danger btn-xs">
-                  Delete
+                  Borrar
                 </button>
               </form>
             </td>
@@ -208,14 +202,14 @@
           <button type="button" class="close" data-dismiss="modal">
             <span>&times;</span>
           </button>
-          <h4 class="modal-title">Confirm deletion</h4>
+          <h4 class="modal-title">Confirmar acción</h4>
         </div>
         <div class="modal-body">
-          <p>Are you sure you want to delete the plan "<strong id="planNameToDelete"></strong>"?</p>
+          <p>Estás seguro de que deseas eliminar el plan "<strong id="planNameToDelete"></strong>"? </p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Borrar</button>
         </div>
       </div>
     </div>
