@@ -1,7 +1,6 @@
 package com.ginamarieges.travelplans.web;
 
 import com.ginamarieges.travelplans.domain.Plan;
-import com.ginamarieges.travelplans.domain.PlanType;
 import com.ginamarieges.travelplans.service.CompatibilityGroupingResult;
 import com.ginamarieges.travelplans.service.PlanService;
 import com.ginamarieges.travelplans.service.ValidationResult;
@@ -100,9 +99,9 @@ public class PlanListServlet extends HttpServlet {
 
         Plan plan = new Plan();
         plan.setName(name);
-        plan.setType(parsePlanType(typeRaw));
-        plan.setTotalAdults(parseIntegerOrNull(totalAdultsRaw));
-        plan.setTotalKids(parseIntegerOrNull(totalKidsRaw));
+        plan.setType(RequestParsers.parsePlanType(typeRaw));
+        plan.setTotalAdults(RequestParsers.parseIntegerOrNull(totalAdultsRaw));
+        plan.setTotalKids(RequestParsers.parseIntegerOrNull(totalKidsRaw));
 
         ValidationResult validationResult = planService.createPlan(plan, originName, destinationName);
 
@@ -112,12 +111,12 @@ public class PlanListServlet extends HttpServlet {
             
             request.setAttribute("errorsByFieldName", validationResult.getErrorsByFieldName());
 
-            request.setAttribute("nameValue", safeString(name));
-            request.setAttribute("typeValue", safeString(typeRaw));
-            request.setAttribute("totalAdultsValue", safeString(totalAdultsRaw));
-            request.setAttribute("totalKidsValue", safeString(totalKidsRaw));
-            request.setAttribute("originValue", safeString(originName));
-            request.setAttribute("destinationValue", safeString(destinationName));
+            request.setAttribute("nameValue", RequestParsers.safeString(name));
+            request.setAttribute("typeValue", RequestParsers.safeString(typeRaw));
+            request.setAttribute("totalAdultsValue", RequestParsers.safeString(totalAdultsRaw));
+            request.setAttribute("totalKidsValue", RequestParsers.safeString(totalKidsRaw));
+            request.setAttribute("originValue", RequestParsers.safeString(originName));
+            request.setAttribute("destinationValue", RequestParsers.safeString(destinationName));
 
             request.getRequestDispatcher("/WEB-INF/jsp/plan-form.jsp").forward(request, response);
             return;
@@ -125,35 +124,5 @@ public class PlanListServlet extends HttpServlet {
 
         LOG.info("Plan created successfully: " + name);
         response.sendRedirect(request.getContextPath() + "/plans");
-    }
-
-    private static PlanType parsePlanType(String rawType) {
-        if (rawType == null || rawType.trim().isEmpty()) {
-            return null;
-        }
-        try {
-            return PlanType.valueOf(rawType.trim());
-        } catch (IllegalArgumentException ignored) {
-            return null;
-        }
-    }
-
-    private static Integer parseIntegerOrNull(String rawNumber) {
-        if (rawNumber == null) {
-            return null;
-        }
-        String trimmed = rawNumber.trim();
-        if (trimmed.isEmpty()) {
-            return null;
-        }
-        try {
-            return Integer.valueOf(trimmed);
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
-    }
-
-    private static String safeString(String value) {
-        return value == null ? "" : value;
     }
 }
