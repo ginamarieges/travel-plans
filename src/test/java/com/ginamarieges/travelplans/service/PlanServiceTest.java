@@ -189,4 +189,172 @@ class PlanServiceTest {
     assertEquals(2, result.getOtherPlans().size());
   }
 
+  @Test
+  void updatePlan_shouldUpdatePlan_whenValidAndExists_andResolveCities() {
+    InMemoryPlanRepository planRepository = new InMemoryPlanRepository();
+    InMemoryCityRepository cityRepository = new InMemoryCityRepository();
+    PlanValidator validator = new PlanValidator();
+    PlanService planService = new PlanService(planRepository, validator, cityRepository);
+
+    // Create initial plan
+    Plan createdPlan = new Plan();
+    createdPlan.setName("Original");
+    createdPlan.setType(PlanType.NORMAL);
+    createdPlan.setTotalAdults(2);
+    createdPlan.setTotalKids(0);
+
+    ValidationResult createResult = planService.createPlan(createdPlan, "Madrid", "Barcelona");
+    assertTrue(createResult.isValid());
+
+    Integer existingPlanId = planService.getAllPlans().get(0).getId();
+    assertNotNull(existingPlanId);
+
+    // Update same plan
+    Plan updatedPlan = new Plan();
+    updatedPlan.setId(existingPlanId);
+    updatedPlan.setName("Updated");
+    updatedPlan.setType(PlanType.NORMAL);
+    updatedPlan.setTotalAdults(3);
+    updatedPlan.setTotalKids(1);
+
+    ValidationResult updateResult = planService.updatePlan(updatedPlan, "Valencia", "Sevilla");
+    assertTrue(updateResult.isValid());
+
+    Plan savedPlan = planService.getPlanById(existingPlanId)
+    .orElseThrow(() -> new AssertionError("Expected plan to exist"));
+    assertEquals("Updated", savedPlan.getName());
+    assertEquals(3, savedPlan.getTotalAdults());
+    assertEquals(1, savedPlan.getTotalKids());
+
+    assertNotNull(savedPlan.getOrigin());
+    assertNotNull(savedPlan.getDestination());
+    assertEquals("Valencia", savedPlan.getOrigin().getName());
+    assertEquals("Sevilla", savedPlan.getDestination().getName());
+  }
+
+  @Test
+  void updatePlan_shouldFail_whenPlanIsNull() {
+    PlanService planService = new PlanService(
+        new InMemoryPlanRepository(),
+        new PlanValidator(),
+        new InMemoryCityRepository()
+    );
+
+    assertThrows(IllegalArgumentException.class, () ->
+        planService.updatePlan(null, "Madrid", "Barcelona")
+    );
+  }
+
+  @Test
+  void updatePlan_shouldFail_whenIdIsMissing() {
+    PlanService planService = new PlanService(
+        new InMemoryPlanRepository(),
+        new PlanValidator(),
+        new InMemoryCityRepository()
+    );
+
+    Plan plan = new Plan();
+    plan.setName("No id");
+    plan.setType(PlanType.NORMAL);
+    plan.setTotalAdults(1);
+    plan.setTotalKids(0);
+
+    ValidationResult result = planService.updatePlan(plan, "Madrid", "Barcelona");
+
+    assertFalse(result.isValid());
+    assertTrue(result.getErrorsByFieldName().containsKey("id"));
+  }
+
+  @Test
+  void updatePlan_shouldFail_whenPlanDoesNotExist() {
+    PlanService planService = new PlanService(
+        new InMemoryPlanRepository(),
+        new PlanValidator(),
+        new InMemoryCityRepository()
+    );
+
+    Plan plan = new Plan();
+    plan.setId(999);
+    plan.setName("Missing");
+    plan.setType(PlanType.NORMAL);
+    plan.setTotalAdults(1);
+    plan.setTotalKids(0);
+
+    ValidationResult result = planService.updatePlan(plan, "Madrid", "Barcelona");
+
+    assertFalse(result.isValid());
+    assertTrue(result.getErrorsByFieldName().containsKey("id"));
+  }
+
+  @Test
+  void updatePlan_shouldNotOverwriteExisting_whenValidationFails() {
+    InMemoryPlanRepository planRepository = new InMemoryPlanRepository();
+    InMemoryCityRepository cityRepository = new InMemoryCityRepository();
+    PlanService planService = new PlanService(planRepository, new PlanValidator(), cityRepository);
+
+    // Create initial valid plan
+    Plan initialPlan = new Plan();
+    initialPlan.setName("Initial");
+    initialPlan.setType(PlanType.NORMAL);
+    initialPlan.setTotalAdults(1);
+    initialPlan.setTotalKids(0);
+
+    assertTrue(planService.createPlan(initialPlan, "Madrid", "Barcelona").isValid());
+    Integer existingPlanId = planService.getAllPlans().get(0).getId();
+
+    // Invalid update: missing name
+    Plan invalidUpdate = new Plan();
+    invalidUpdate.setId(existingPlanId);
+    invalidUpdate.setName(""); // invalid
+    invalidUpdate.setType(PlanType.NORMAL);
+    invalidUpdate.setTotalAdults(2);
+    invalidUpdate.setTotalKids(0);
+
+    ValidationResult result = planService.updatePlan(invalidUpdate, "Valencia", "Sevilla");
+    assertFalse(result.isValid());
+
+    // Ensure plan remains unchanged
+    Plan savedPlan = planService.getPlanById(existingPlanId)
+    .orElseThrow(() -> new AssertionError("Expected plan to exist"));
+    assertEquals("Initial", savedPlan.getName());
+    assertEquals("Madrid", savedPlan.getOrigin().getName());
+    assertEquals("Barcelona", savedPlan.getDestination().getName());
+  }
+
+  @Test
+  void deletePlan_shouldReturnTrue_whenPlanExists() {
+    PlanService planService = new PlanService(
+        new InMemoryPlanRepository(),
+        new PlanValidator(),
+        new InMemoryCityRepository()
+    );
+
+    Plan plan = new Plan();
+    plan.setName("To delete");
+    plan.setType(PlanType.NORMAL);
+    plan.setTotalAdults(1);
+    plan.setTotalKids(0);
+
+    assertTrue(planService.createPlan(plan, "Madrid", "Barcelona").isValid());
+    Integer planId = planService.getAllPlans().get(0).getId();
+
+    boolean deleted = planService.deletePlan(planId);
+
+    assertTrue(deleted);
+    assertTrue(planService.getAllPlans().isEmpty());
+    assertFalse(planService.getPlanById(planId).isPresent());
+  }
+
+  @Test
+  void deletePlan_shouldReturnFalse_whenPlanDoesNotExist() {
+    PlanService planService = new PlanService(
+        new InMemoryPlanRepository(),
+        new PlanValidator(),
+        new InMemoryCityRepository()
+    );
+
+    boolean deleted = planService.deletePlan(999);
+
+    assertFalse(deleted);
+  }
 }
