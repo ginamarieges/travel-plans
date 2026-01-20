@@ -12,12 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Service layer for travel plan business logic.
+ * Handles plan CRUD operations, validation, and compatibility grouping.
+ */
 public class PlanService {
 
   private final PlanRepository planRepository;
   private final PlanValidator planValidator;
   private final CityRepository cityRepository;
 
+  /**
+   * Constructor with dependency injection.
+   * All dependencies are required - fails fast if any are null.
+   */
   public PlanService(PlanRepository planRepository, PlanValidator planValidator, CityRepository cityRepository) {
     if (planRepository == null) {
       throw new IllegalArgumentException("PlanRepository must not be null");
@@ -33,8 +41,13 @@ public class PlanService {
     this.cityRepository = cityRepository;
   }
 
+  /**
+   * Creates a new plan with automatic city resolution.
+   * Cities are looked up or created on-the-fly to avoid manual city management.
+   */
   public ValidationResult createPlan(Plan plan, String originCityName, String destinationCityName) {
     
+    // Resolve city names to City objects (creates cities if they don't exist)
     plan.setOrigin(resolveCity(originCityName));
     plan.setDestination(resolveCity(destinationCityName));
 
@@ -43,18 +56,23 @@ public class PlanService {
       return validationResult;
     }
 
-    // On create, we always let the repository assign the ID.
+    // Clear any ID to ensure the repository generates a new one
     plan.setId(null);
 
     planRepository.save(plan);
     return validationResult;
   }
 
+  /**
+   * Updates an existing plan.
+   * Validates that the plan exists before attempting update.
+   */
   public ValidationResult updatePlan(Plan plan, String originCityName, String destinationCityName) {
     if (plan == null) {
       throw new IllegalArgumentException("Plan must not be null");
     }
 
+    // Resolve cities (creates if needed)
     plan.setOrigin(resolveCity(originCityName));
     plan.setDestination(resolveCity(destinationCityName));
 
@@ -63,11 +81,13 @@ public class PlanService {
       return validationResult;
     }
 
+    // Ensure ID is present for update operation
     if (plan.getId() == null) {
       validationResult.addFieldError("id", "Plan id is required for update.");
       return validationResult;
     }
 
+    // Verify plan exists before updating
     Optional<Plan> existingPlan = planRepository.findById(plan.getId());
     if (!existingPlan.isPresent()) {
       validationResult.addFieldError("id", "Plan not found.");
@@ -90,21 +110,28 @@ public class PlanService {
     return planRepository.findAll();
   }
 
+  /**
+   * Groups plans by compatibility criteria (type, origin, destination).
+   * Plans are compatible if they share the same type and route - useful for
+   * finding potential travel companions or combining bookings.
+   */
   public CompatibilityGroupingResult groupPlansByCompatibility() {
     List<Plan> allPlans = planRepository.findAll();
 
+    // Group plans by compatibility key - LinkedHashMap preserves insertion order
     Map<CompatibilityKey, List<Plan>> plansByKey = new LinkedHashMap<>();
 
     for (Plan plan : allPlans) {
-      //Create Compatibility keys for each plan
+      // Create compatibility key based on type and route
       CompatibilityKey key = CompatibilityKey.fromPlan(plan);
-      //Add list of plans for each key
+      // Group plans with matching keys
       plansByKey.computeIfAbsent(key, ignoredKey -> new ArrayList<>()).add(plan);
     }
 
     List<Plan> compatiblePlans = new ArrayList<>();
     List<Plan> otherPlans = new ArrayList<>();
 
+    // Separate plans: compatible (2+ in group) vs standalone (only 1 in group)
     for (List<Plan> group : plansByKey.values()) {
       if (group.size() >= 2) {
         compatiblePlans.addAll(group);
@@ -116,6 +143,11 @@ public class PlanService {
     return new CompatibilityGroupingResult(compatiblePlans, otherPlans);
   } 
 
+  /**
+   * Immutable key for grouping plans by compatibility.
+   * Plans are compatible if they have the same type, origin, and destination.
+   * Uses normalized text (trimmed, uppercase) for case-insensitive matching.
+   */
   private static final class CompatibilityKey {
 
     private final PlanType planType;
@@ -142,6 +174,7 @@ public class PlanService {
       );
     }
 
+    // Normalize for case-insensitive comparison (e.g., "Barcelona" == "BARCELONA")
     private static String normalizeText(String rawText) {
       return rawText == null ? "" : rawText.trim().toUpperCase();
     }
@@ -168,6 +201,12 @@ public class PlanService {
       return result;
     }
   }
+
+  /**
+   * Resolves a city name to a City object.
+   * Looks up existing city or creates a new one - simplifies city management
+   * by allowing users to type city names without pre-registration.
+   */
   private City resolveCity(String cityNameRaw) {
     if (cityNameRaw == null || cityNameRaw.trim().isEmpty()) {
       return null;

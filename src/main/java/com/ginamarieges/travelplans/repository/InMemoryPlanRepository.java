@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import com.ginamarieges.travelplans.domain.Plan;
 
@@ -58,7 +59,11 @@ public class InMemoryPlanRepository implements PlanRepository {
   // so callers cannot change the internal repository state.
   @Override
   public synchronized List<Plan> findAll() {
-    return Collections.unmodifiableList(new ArrayList<>(plansById.values()));
+      return Collections.unmodifiableList(
+          plansById.values().stream()
+              .map(Plan::new)  // ← Lo esencial: copias de Plan
+              .collect(Collectors.toList())
+      );
   }
 
   @Override

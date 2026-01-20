@@ -16,7 +16,19 @@ public class Plan {
   public Plan() {
 
   }
-  
+
+  public Plan(Plan other) {
+      this.id = other.id;
+      this.name = other.name;
+      this.type = other.type;
+      this.totalAdults = other.totalAdults;
+      this.totalKids = other.totalKids;
+      this.origin = other.origin;
+      this.destination = other.destination;
+      this.createdAt = other.createdAt;
+      this.updatedAt = other.updatedAt;
+  }
+
   public Integer getId() {
     return id;
   }
