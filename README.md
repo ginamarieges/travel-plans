@@ -116,8 +116,9 @@ http://localhost:8080/travel-plans/plans
 | GET | `/plans?grouping=true` | Group compatible plans |
 | GET | `/plans/new` | Create plan form |
 | POST | `/plans` | Create plan |
-| GET | `/plans/edit?id={id}` | Edit plan form |
-| POST | `/plans/edit` | Update plan |
+| GET | `/plans/new?id={id}` | Edit plan form |
+| POST | `/plans/new` | Update plan |
+| POST | `/plans?action=delete&id={id}` | Delete plan |
 
 ## Notes
 
